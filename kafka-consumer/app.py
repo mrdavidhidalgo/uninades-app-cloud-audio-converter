@@ -4,9 +4,9 @@ from kafka import KafkaProducer,KafkaConsumer
 from json import loads
 import logging
 log = logging.getLogger(__name__)
-
+logging.basicConfig(level=logging.DEBUG)
 print("Iniciando")
-sleep(3)
+sleep(30)
 
 try:
     consumer = KafkaConsumer(

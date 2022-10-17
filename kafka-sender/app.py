@@ -4,6 +4,7 @@ from kafka import KafkaProducer,KafkaConsumer
 from json import loads
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 log.info("Iniciando")
