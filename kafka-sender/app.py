@@ -7,6 +7,7 @@ import logging
 log = logging.getLogger(__name__)
 
 log.info("Iniciando")
+sleep(20)
 producer = KafkaProducer(bootstrap_servers=['kafka:9092'],
                          value_serializer=lambda x: 
                          dumps(x).encode('utf-8'),

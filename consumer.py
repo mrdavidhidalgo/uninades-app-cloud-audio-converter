@@ -4,6 +4,7 @@ from kafka import KafkaProducer,KafkaConsumer
 from json import loads
 
 print("Iniciando")
+sleep(20)
 consumer = KafkaConsumer(
     'numtest',
      bootstrap_servers=['localhost:9092'],
