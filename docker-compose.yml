@@ -15,8 +15,6 @@ services:
       - 'app-tier'  
     ports:
       - "9092:9092"
-    volumes:
-      - "./data/kafka_data:/bitnami/kafka/data"
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
@@ -91,6 +89,18 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+  converter-api:
+    build: ./converter-api/.  
+    networks:
+      - 'app-tier'  
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - '5000:5000'
+    volumes:
+      - './data/shared:/data'
+      - './data/logs:/var/logs'
 networks:
   app-tier:
     name: app-tier

@@ -20,6 +20,7 @@ class User(BaseModel):
     username : str
     mail : str
     password : str
+    name: str
 
     @validator('mail')
     def mail_must_be_valid(cls, mail: str):

@@ -1,14 +1,14 @@
 
 
 from flask_restful import Resource
-from services import sign_service, task_service
+from services import sign_service, task_service,logs
 from services import exceptions
 from adapters import conversion_scheduler
 from repositorios import user_repository, task_repository
 from flask import request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 import pydantic
-
+log = logs.get_logger()
 
 class VistaHealth(Resource):
 
@@ -30,9 +30,9 @@ class VistaSignUp(Resource):
                     }, 400
 
         try:
-            register_user_input = sign_service.RegisterUserInput(username = request.json["username"], mail= request.json["email"], password = request.json["password1"])
+            register_user_input = sign_service.RegisterUserInput(name = request.json["name"],username = request.json["username"], mail= request.json["email"], password = request.json["password1"])
             user_id = sign_service.create_user(register_user_input=register_user_input, user_repository=user_repository.UserRepository())   
-            token_de_acceso = create_access_token(identity=user_id)
+            token_de_acceso = create_access_token(identity=request.json["username"])
             return {"mensaje": "User was created succesfully", "token": token_de_acceso, "id": user_id}
         except (exceptions.UserAlreadyExistError) as e:
             return {"errors": { "type": f"/exceptions/{type(e).__name__}",
@@ -68,6 +68,7 @@ class VistaTask(Resource):
 
         try:
             user_id = get_jwt_identity() 
+            log.info("Creating task for %s",user_id)
             input_task = task_service.RegisterConversionTaskInput(user_id=user_id, 
                                                              source_file_path=request.json["fileName"], 
                                                              source_file_format=extract_file_format(request.json["fileName"]),
@@ -88,7 +89,9 @@ class VistaTask(Resource):
                     }
                     for error in e.errors()
                 ]}, 400
-
+        except Exception as e:
+            log.error(e)
+            log.error("Creating task for %s %s",user_id,e)
 def extract_file_format(filename: str)-> task_service.FileFormat:
     return task_service.FileFormat.MP3
  

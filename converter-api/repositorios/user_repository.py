@@ -6,8 +6,8 @@ from typing import Optional
 class UserRepository(user_repository.UserRepository):
    
     def create_user(self, user: User)-> str:
-        
-        new_user = db_model.User(name = user.name, username = user.username, mail = user.mail, password = user.password)
+                
+        new_user = db_model.User(name = user.username, username = user.username, mail = user.mail, password = user.password)
         db_model.db.session.add(new_user)
         db_model.db.session.commit()
 
