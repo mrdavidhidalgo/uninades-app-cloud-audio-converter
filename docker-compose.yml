@@ -74,21 +74,6 @@ services:
       retries: 5
 
 #Services
-  kafka-sender:
-    build: ./kafka-sender/.  
-    networks:
-      - 'app-tier'  
-    depends_on:
-      kafka:
-        condition: service_healthy
-
-  kafka-consumer:
-    build: ./kafka-consumer/.  
-    networks:
-      - 'app-tier'  
-    depends_on:
-      kafka:
-        condition: service_healthy
   converter-api:
     build: ./converter-api/.  
     networks:
@@ -100,6 +85,8 @@ services:
       - '5000:5000'
     volumes:
       - './data:/data'
+    environment:
+      - START_KAFKA_CONSUMER=True  
 networks:
   app-tier:
     name: app-tier

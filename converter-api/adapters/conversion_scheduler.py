@@ -14,10 +14,11 @@ class FileConversionScheduler(file_conversion_scheduler.FileConversionScheduler)
                          x.json().encode('utf-8'),
                          )
     def schedule_conversion_task(self, conversion_task: ConversionTaskDetail) -> None:
-        log.info(f"Send task with id {conversion_task.id} to kafka")
-        log.info("Message will be sent to Kafka %s",conversion_task.json())
+        
+        log.info("Send task with id [%s] to Kafka topic [%s] message -> %s",conversion_task.id,'file.conversion.requested', conversion_task.json())
         self.producer.send('file.conversion.requested', value=conversion_task)
-        log.info("Message sent")
+        log.info("Task with id [%s] was sent to Kafka",conversion_task.id)
+
 
 
 

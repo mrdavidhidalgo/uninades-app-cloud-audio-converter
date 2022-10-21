@@ -2,7 +2,9 @@ from services.contracts.task_repository import TaskRepository
 from services.contracts.file_conversion_scheduler import FileConversionScheduler
 from pydantic import BaseModel
 from services.model.model import ConversionTask, FileFormat, ConversionTaskDetail, FileStatus
+from services import  logs
 
+_LOGGER = logs.get_logger()
 class RegisterConversionTaskInput(BaseModel):
 
     user_id : str
@@ -40,6 +42,7 @@ def register_conversion_task(task_repository: TaskRepository,
 def convert_file_task(task_repository: TaskRepository, 
                       conversion_task_detail : ConversionTaskDetail)-> None:
     
+    _LOGGER.info("Se acaba de recibir el mensaje [%r] para ser procesado",conversion_task_detail)
 
     # conversion
     task_repository.update_conversion_task(task_id=conversion_task_detail.id,

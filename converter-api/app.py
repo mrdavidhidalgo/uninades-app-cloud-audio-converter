@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 import os
 from entrypoints.web import vistas
+from entrypoints.events import consumer
 # Importamos la BD
 from repositorios.db_model.db_model import db
 
@@ -45,6 +46,10 @@ def create_app():
     api.add_resource(vistas.VistaLogin, '/api/auth/login')
     api.add_resource(vistas.VistaTask, '/api/tasks')
 
+    if os.getenv('START_KAFKA_CONSUMER','False') == 'True':
+        consumer.start()
+    
+    
     jwt = JWTManager(app)
     return app
 
