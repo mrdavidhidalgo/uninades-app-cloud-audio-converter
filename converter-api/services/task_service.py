@@ -32,3 +32,17 @@ def register_conversion_task(task_repository: TaskRepository,
     conversion_scheduler.schedule_conversion_task(conversion_task=task_detail)
 
     return task_id
+
+
+
+
+
+def convert_file_task(task_repository: TaskRepository, 
+                      conversion_task_detail : ConversionTaskDetail)-> None:
+    
+
+    # conversion
+    task_repository.update_conversion_task(task_id=conversion_task_detail.id,
+                                           target_file_path="nuevo path", state=FileStatus.PROCESSED)
+    
+    # enviar email

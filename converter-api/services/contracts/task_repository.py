@@ -1,6 +1,6 @@
 import abc
 
-from services.model.model import ConversionTaskDetail, ConversionTask, FileFormat
+from services.model.model import ConversionTaskDetail, ConversionTask, FileFormat,FileStatus
 from typing import List
 
 class TaskRepository(abc.ABC):
@@ -25,3 +25,6 @@ class TaskRepository(abc.ABC):
     def delete_task_conversion_by_id(self, task_id: str)-> None: 
         ...
     
+    @abc.abstractmethod
+    def update_conversion_task(self, task_id: str,target_file_path: str, state : FileStatus ) -> None: 
+        ...
