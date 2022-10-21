@@ -56,7 +56,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - './data/postgres:/var/lib/postgresql/data'
+      - './service-data/postgres:/var/lib/postgresql/data'
       - './postgresql.conf:/etc/postgresql/postgresql.conf'
 
     environment:
@@ -99,8 +99,7 @@ services:
     ports:
       - '5000:5000'
     volumes:
-      - './data/shared:/data'
-      - './data/logs:/var/logs'
+      - './data:/data'
 networks:
   app-tier:
     name: app-tier

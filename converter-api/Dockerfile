@@ -5,4 +5,5 @@ RUN pip install -r ./requirements.txt
 ADD . .
 ENV PORT 5000
 EXPOSE $PORT
-CMD ["python", "app.py"]   
+#CMD ["python", "app.py"]   
+ENTRYPOINT [ "./gunicorn.sh" ]
