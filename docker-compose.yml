@@ -79,12 +79,26 @@ services:
     networks:
       - 'app-tier'  
     depends_on:
-      kafka:
-        condition: service_healthy
       db:
         condition: service_healthy
     ports:
       - '5000:5000'
+    volumes:
+      - './data:/opt/data'
+    environment:
+      - START_KAFKA_CONSUMER=False
+      - EMAIL_ENABLE=False 
+      - DATA_PATH=/opt/data
+  
+  consumer-api:
+    build: ./converter-api/.  
+    networks:
+      - 'app-tier'  
+    depends_on:
+      kafka:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     volumes:
       - './data:/opt/data'
     environment:

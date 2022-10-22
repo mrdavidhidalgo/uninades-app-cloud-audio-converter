@@ -111,7 +111,7 @@ def convert_file_task(task_repository: TaskRepository,
     _LOGGER.info("Se acaba de recibir el mensaje [%r] para ser procesado",conversion_task_detail)
 
     data_path = os.environ.get('DATA_PATH')
-    email_enable = os.environ.get('EMAIL_ENABLE')
+    email_enable = os.environ.get('EMAIL_ENABLE') == 'True'
     
     # conversion
     a=conversion_task_detail
@@ -167,7 +167,7 @@ def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use
     if(len(parametros) > 0):
         _LOGGER.info("Executing " + comando + " " + parametros)
         os.system(comando + parametros)
-        if bool(use_email):
+        if use_email:
            if(len(email) > 2):
                _LOGGER.info("Sending confirmation to %s", email)
                send_mail(email, destino + "." + salida2)
