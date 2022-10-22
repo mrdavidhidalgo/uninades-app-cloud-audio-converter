@@ -2,6 +2,7 @@
 
 from flask_restful import Resource
 from services import sign_service, task_service,logs
+from services.model.model import ConversionTaskDetailEncoder
 from services import exceptions
 from adapters import conversion_scheduler
 from repositorios import user_repository, task_repository
@@ -30,16 +31,17 @@ class VistaSignUp(Resource):
                     }, 400
 
         try:
-            register_user_input = sign_service.RegisterUserInput(name = request.json["name"],username = request.json["username"], mail= request.json["email"], password = request.json["password1"])
+            register_user_input = sign_service.RegisterUserInput(username = request.json["username"], mail= request.json["mail"], password = password_1)
             user_id = sign_service.create_user(register_user_input=register_user_input, user_repository=user_repository.UserRepository())   
-            token_de_acceso = create_access_token(identity=request.json["username"])
-            return {"mensaje": "User was created succesfully", "token": token_de_acceso, "id": user_id}
+            token_de_acceso = create_access_token(identity=user_id)
+            return {"message": "User was created succesfully", "token": token_de_acceso, "id": user_id}
         except (exceptions.UserAlreadyExistError) as e:
             return {"errors": { "type": f"/exceptions/{type(e).__name__}",
                                 "detail": e.message,
                               } 
                     }, 400
         except pydantic.ValidationError as e:
+            print(e)
             return {"errors": [
                     {
                         "type": "/exceptions/InvalidFormat",
@@ -57,11 +59,11 @@ class VistaLogin(Resource):
 
             user_id = sign_service.log_in(user_repository=user_repository.UserRepository(), username=request.json["username"], password = request.json["password"])
             token_de_acceso = create_access_token(identity=user_id)
-            return {"mensaje": "User successfully logged in", "token": token_de_acceso, "id": user_id}
+            return {"message": "User successfully logged in", "token": token_de_acceso, "id": user_id}
         except exceptions.UserOrPasswordInvalidError as e:
             return e.message, 400
 
-class VistaTask(Resource):
+class VistaTasks(Resource):
     
     @jwt_required()
     def post(self):
@@ -69,18 +71,25 @@ class VistaTask(Resource):
         try:
             user_id = get_jwt_identity() 
             log.info("Creating task for %s",user_id)
+            target_format = request.json["newFormat"]
+            validate_file_format(format = target_format)
+            
             input_task = task_service.RegisterConversionTaskInput(user_id=user_id, 
                                                              source_file_path=request.json["fileName"], 
                                                              source_file_format=extract_file_format(request.json["fileName"]),
-                                                             target_file_format=task_service.FileFormat[request.json["newFormat"]], )
+                                                             target_file_format=task_service.FileFormat[target_format], )
 
             task_id = task_service.register_conversion_task(task_repository=task_repository.TaskRepository(), 
                                                             conversion_scheduler=conversion_scheduler.FileConversionScheduler(),
                                                             register_conversion_task_input=input_task)
 
-            return {"mensaje": f"Task with id [{task_id}] was created"}
-        except exceptions.UserOrPasswordInvalidError as e:
-            return e.message, 400
+            return {"message": f"Task with id [{task_id}] was created"}
+        except task_service.ConverterException as e:
+            return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": e.message
+                    
+                    
+            }}, 400
         except pydantic.ValidationError as e:
             return {"errors": [
                     {
@@ -89,9 +98,142 @@ class VistaTask(Resource):
                     }
                     for error in e.errors()
                 ]}, 400
-        except Exception as e:
-            log.error(e)
-            log.error("Creating task for %s %s",user_id,e)
+           
+    @jwt_required()
+    def get(self):
+        try:
+            user_id = get_jwt_identity() 
+            log.info("Getting tasks for user %s",user_id)
+            
+            all_data = task_service.get_tasks_by_user_id(task_repository=task_repository.TaskRepository(), 
+                                                         user_id = user_id)
+            return [{"id": data.id, 
+                     "filename": data.source_file_path, 
+                     "source_format": data.source_file_format.value, 
+                     "target_file_format": data.target_file_format.value, 
+                     "status": data.state.value } 
+                for data in all_data]
+            
+           
+        except task_service.ConverterException as e:
+            return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": e.message
+                    
+                    
+            }}, 400
+        except pydantic.ValidationError as e:
+            print(e)
+            return {"errors": [
+                    {
+                        "type": "/exceptions/InvalidFormat",
+                        "detail": error["msg"],
+                    }
+                    for error in e.errors()
+                ]}, 400
+            
+            
+    
+            
+class VistaTask(Resource):
+    
+    @jwt_required()
+    def get(self, task_id: int):
+        try:
+            user_id = get_jwt_identity() 
+            log.info("Getting task with id %s",task_id)
+            
+            data = task_service.get_task_by_id(task_repository=task_repository.TaskRepository(), 
+                                               user_id = user_id, 
+                                               task_id=task_id)
+            
+            return {"id": data.id, 
+                     "filename": data.source_file_path, 
+                     "source_format": data.source_file_format.value, 
+                     "target_file_format": data.target_file_format.value, 
+                     "status": data.state.value } if data is not None else {}
+                     
+        except task_service.ConverterException as e:
+            return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": e.message
+                    
+                    
+            }}, 400
+        except pydantic.ValidationError as e:
+            print(e)
+            return {"errors": [
+                    {
+                        "type": "/exceptions/InvalidFormat",
+                        "detail": error["msg"],
+                    }
+                    for error in e.errors()
+                ]}, 400
+            
+    @jwt_required()
+    def put(self, task_id: int):
+        
+        try: 
+            user_id = get_jwt_identity() 
+            log.info("updating task with id %s",task_id)
+            
+            target_format = request.json["newFormat"]
+            validate_file_format(format = target_format)
+            
+            data = task_service.update_target_format_to_conversion_task(task_repository=task_repository.TaskRepository(),
+                                                                        conversion_scheduler=conversion_scheduler.FileConversionScheduler(), 
+                                                                        user_id = user_id, 
+                                                                        task_id=task_id, 
+                                                                        file_format= task_service.FileFormat[target_format] )
+            
+        
+            return {"id": data.id, 
+                        "filename": data.source_file_path, 
+                        "source_format": data.source_file_format.value, 
+                        "target_file_format": data.target_file_format.value, 
+                        "status": data.state.value } if data is not None else {}
+        
+        except task_service.ConverterException as e:
+            return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": e.message
+                    
+                    
+            }}, 400
+        except pydantic.ValidationError as e:
+            return {"errors": [
+                    {
+                        "type": "/exceptions/InvalidFormat",
+                        "detail": error["msg"],
+                    }
+                    for error in e.errors()
+                ]}, 400
+            
+    @jwt_required()
+    def delete(self, task_id: int):
+        
+        try: 
+            user_id = get_jwt_identity() 
+            log.info("deleting task with id %s",task_id)
+            
+            
+        
+            return f"Task with id {task_id} was deleted successfully"
+        
+        except task_service.ConverterException as e:
+            return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": e.message
+                    
+                    
+            }}, 400
+        
+            
 def extract_file_format(filename: str)-> task_service.FileFormat:
-    return task_service.FileFormat.MP3
+    extension = filename.split(".")[1].upper()
+    
+    validate_file_format(format = extension)
+    
+    return task_service.FileFormat[extension]
+
+def validate_file_format(format : str):
+    
+    if not hasattr(task_service.FileFormat, format.upper()):
+        raise task_service.ConverterException(message = f"Format [{format}] not available for conversion")  
  

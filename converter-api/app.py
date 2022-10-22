@@ -13,14 +13,17 @@ def create_app():
     app = Flask(__name__)  #constructor con el nombre de la aplicación
 
     # BD sin usuario ni contraseña
-    host = os.getenv('POSTGRES_HOST','localhost')
+    host = os.getenv('POSTGRES_HOST','db')
+    #host = os.getenv('POSTGRES_HOST','localhost')
     user = os.getenv('POSTGRES_USER','postgres')
     database = os.getenv('POSTGRES_DB','postgres')
-    port = os.getenv('POSTGRES_PORT',6379)
-    DATABASE_CONNECTION_URI = f'postgresql+psycopg2://{user}@{host}:{port}/{database}'
-    #app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_CONNECTION_URI
+    password = os.getenv('POSTGRES_PASSWORD','postgres')
+    #port = os.getenv('POSTGRES_PORT',6379)
+    port = os.getenv('POSTGRES_PORT',5432)
+    DATABASE_CONNECTION_URI = f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_CONNECTION_URI
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///converter.db'
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///converter.db'
 
     # Deshabilitar un flag para que SQlAlchemy no genera track de modificaciones
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -44,7 +47,10 @@ def create_app():
     api.add_resource(vistas.VistaHealth, '/health')
     api.add_resource(vistas.VistaSignUp, '/api/auth/signup')
     api.add_resource(vistas.VistaLogin, '/api/auth/login')
-    api.add_resource(vistas.VistaTask, '/api/tasks')
+    api.add_resource(vistas.VistaTasks, '/api/tasks')
+    api.add_resource(vistas.VistaTask, '/api/tasks/<int:task_id>')
+    #api.add_resource(vistas.VistaFiles, '/api/files/<str:filename>')
+    
 
     if os.getenv('START_KAFKA_CONSUMER','False') == 'True':
         consumer.start()

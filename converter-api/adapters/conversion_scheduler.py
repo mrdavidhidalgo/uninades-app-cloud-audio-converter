@@ -17,7 +17,7 @@ class FileConversionScheduler(file_conversion_scheduler.FileConversionScheduler)
         
         log.info("Send task with id [%s] to Kafka topic [%s] message -> %s",conversion_task.id,'file.conversion.requested', conversion_task.json())
         self.producer.send('file.conversion.requested', value=conversion_task)
-        log.info("Task with id [%s] was sent to Kafka",conversion_task.id)
+        log.info(f"Task with id [%s] was sent to Kafka to convert to [%s] format", conversion_task.id, conversion_task.target_file_format)
 
 
 
