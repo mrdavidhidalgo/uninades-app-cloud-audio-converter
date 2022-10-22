@@ -45,7 +45,7 @@ services:
       kafka-topics.sh --bootstrap-server kafka:9092 --list
 
       echo -e 'Creating kafka topics'
-      kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic numtest --replication-factor 1 --partitions 3
+      kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic file.conversion.requested --replication-factor 1 --partitions 3
 
       echo -e 'Successfully created the following topics:'
       kafka-topics.sh --bootstrap-server kafka:9092 --list
@@ -84,9 +84,11 @@ services:
     ports:
       - '5000:5000'
     volumes:
-      - './data:/data'
+      - './data:/opt/data'
     environment:
-      - START_KAFKA_CONSUMER=True  
+      - START_KAFKA_CONSUMER=True
+      - EMAIL_ENABLE=True 
+      - DATA_PATH=/opt/data
 networks:
   app-tier:
     name: app-tier

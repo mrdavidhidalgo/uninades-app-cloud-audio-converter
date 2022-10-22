@@ -48,33 +48,45 @@ def convert_file_task(task_repository: TaskRepository,
     
     _LOGGER.info("Se acaba de recibir el mensaje [%r] para ser procesado",conversion_task_detail)
 
+    data_path = os.environ.get('DATA_PATH')
+    email_enable = os.environ.get('EMAIL_ENABLE')
+    
+    
     # conversion
     a=conversion_task_detail
-    b=convertir_archivo(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format, '/opt/data',"/opt/data/converted",'')
-    if(b):
-        task_repository.update_conversion_task(task_id=conversion_task_detail.id,
-                                           target_file_path=b, state=FileStatus.PROCESSED)
+    try:
+        b=convertir_archivo(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format, 
+                            '/opt/data',"/opt/data/converted",'')
+        if(b):
+            task_repository.update_conversion_task(task_id=conversion_task_detail.id,
+                                            target_file_path=b, state=FileStatus.PROCESSED)
+    except Exception as e:
+        _LOGGER.error(e)
+        _LOGGER.error("Error at %s",e)
     
     # enviar email
 
 
 def convertir_archivo (origen, destino, formato1, formato2, ruta1, ruta2,email):
+    
+    
+    _LOGGER.info("origen=%s, destino=%s, formato1=%s, formato2=%s, ruta1=%s, ruta2=%s,email=%s",origen, destino, formato1, formato2, ruta1, ruta2,email)
     comando = "/usr/bin/sox "
     parametros=""
-
-    entrada= formato1.replace('FileFormat.', '')
-    salida= formato2.replace('FileFormat.', '')
+    entrada= formato1.value
+    salida= formato2.value
     salida2=salida.lower()
+    destino = destino.split(".")[0]
 
     if not os.path.isdir(ruta1):
-        os.system("mkdir -p %s", ruta1)
+        os.system(f"mkdir -p {ruta1}")
     if not os.path.isdir(ruta2):
-        os.system("mkdir -p %s", ruta2)
+        os.system(f"mkdir -p {ruta2}")
 
 
     if (entrada == "WAV"):
         if(salida == "MP3"):
-            parametros=" -t wav -r 8000 -c 1 " + ruta1 +"/" + origen + ".wav -t mp3 " + ruta2 +"/"  + destino + ".mp3"
+            parametros=" -t wav -r 8000 -c 1  "  + origen + " .wav -t mp3  " + destino + ".mp3"
         if(salida == "OGG"):
             parametros=ruta1 + "/" + origen + ".wav -r 22050 " + ruta2 +"/" + destino + ".ogg"
 
@@ -91,15 +103,17 @@ def convertir_archivo (origen, destino, formato1, formato2, ruta1, ruta2,email):
             parametros=ruta1 + "/" + origen + ".ogg " + ruta2 +"/" + destino + ".mp3"
 
     if(len(parametros) > 0):
+        _LOGGER.info("Executing " + comando + " " + parametros)
         os.system(comando + parametros)
-        print("Executing " + comando + " " + parametros)
+       
         if(len(email) > 2):
-            print("Sending confirmation to ", email)
+            _LOGGER.info("Sending confirmation to %s", email)
             send_mail(email)
         return destino + "." + salida2
     else:
-        print("Formats not supported " + entrada + " to " + salida)
+        _LOGGER.info("Formats not supported " + entrada + " to " + salida)
         return False
 
 def send_mail(email):
+    _LOGGER.info("Sending email to %s",email)
     pass
