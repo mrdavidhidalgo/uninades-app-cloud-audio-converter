@@ -51,12 +51,11 @@ def convert_file_task(task_repository: TaskRepository,
     data_path = os.environ.get('DATA_PATH')
     email_enable = os.environ.get('EMAIL_ENABLE')
     
-    
     # conversion
     a=conversion_task_detail
     try:
-        b=convertir_archivo(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format, 
-                            '/opt/data',"/opt/data/converted",'')
+        b=convert_file(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format,
+                            data_path,data_path + "/converted",'',email_enable)
         if(b):
             task_repository.update_conversion_task(task_id=conversion_task_detail.id,
                                             target_file_path=b, state=FileStatus.PROCESSED)
@@ -67,9 +66,11 @@ def convert_file_task(task_repository: TaskRepository,
     # enviar email
 
 
-def convertir_archivo (origen, destino, formato1, formato2, ruta1, ruta2,email):
+def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email):
     
-    
+    aux = origen2.split(".")
+    origen = aux[0]
+    destino = origen
     _LOGGER.info("origen=%s, destino=%s, formato1=%s, formato2=%s, ruta1=%s, ruta2=%s,email=%s",origen, destino, formato1, formato2, ruta1, ruta2,email)
     comando = "/usr/bin/sox "
     parametros=""
@@ -86,7 +87,7 @@ def convertir_archivo (origen, destino, formato1, formato2, ruta1, ruta2,email):
 
     if (entrada == "WAV"):
         if(salida == "MP3"):
-            parametros=" -t wav -r 8000 -c 1  "  + origen + " .wav -t mp3  " + destino + ".mp3"
+            parametros=" -t wav -r 8000 -c 1 " + ruta1 +"/" + origen + ".wav -t mp3 " + ruta2 +"/"  + destino + ".mp3"
         if(salida == "OGG"):
             parametros=ruta1 + "/" + origen + ".wav -r 22050 " + ruta2 +"/" + destino + ".ogg"
 
@@ -105,15 +106,43 @@ def convertir_archivo (origen, destino, formato1, formato2, ruta1, ruta2,email):
     if(len(parametros) > 0):
         _LOGGER.info("Executing " + comando + " " + parametros)
         os.system(comando + parametros)
-       
-        if(len(email) > 2):
-            _LOGGER.info("Sending confirmation to %s", email)
-            send_mail(email)
+        if use_email:
+           if(len(email) > 2):
+               _LOGGER.info("Sending confirmation to %s", email)
+               send_mail(email, destino + "." + salida2)
         return destino + "." + salida2
     else:
         _LOGGER.info("Formats not supported " + entrada + " to " + salida)
         return False
 
-def send_mail(email):
+def send_mail(email, filename):
     _LOGGER.info("Sending email to %s",email)
-    pass
+    gmail_user = 'formatconverter2022@gmail.com'
+    gmail_app_password = 'nxzrjnthplzaqaps'
+    sent_from = gmail_user
+    sent_to = [email]
+    sent_subject = "Your audio file has been converted"
+    sent_body = ("Hi\n\n"
+                "Audio file %s has been converted\n"
+                "\n"
+                "Regards\n"
+                "Audio-converter-app\n", filename)
+
+    email_text = """\
+    From: %s
+    To: %s
+    Subject: %s
+
+    %s
+    """ % (sent_from, ", ".join(sent_to), sent_subject, sent_body)
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(gmail_user, gmail_app_password)
+        server.sendmail(sent_from, sent_to, email_text)
+        server.close()
+
+        print('Email sent!')
+    except Exception as exception:
+        print("Error: %s!\n\n" % exception)
