@@ -3,10 +3,11 @@ from pydantic import BaseModel, validator
 import re
 import enum
 from typing import Dict, Any, Optional
+from json import JSONEncoder
 
 class FileStatus(enum.Enum):
-    UPLOADED = 1
-    PROCESSED = 2
+    UPLOADED = "UPLOADED"
+    PROCESSED = "PROCESSED"
 
 class FileFormat(enum.Enum):
     MP3 = "MP3"
@@ -20,8 +21,7 @@ class User(BaseModel):
     username : str
     mail : str
     password : str
-    name: str
-
+    
     @validator('mail')
     def mail_must_be_valid(cls, mail: str):
         regex = "^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
@@ -29,6 +29,10 @@ class User(BaseModel):
             raise ValueError("Mail must be valid") 
 
         return mail
+    
+class ConversionTaskDetailEncoder(JSONEncoder):
+        def default(self, o):
+            return o.__dict__
 
 class ConversionTaskDetail(BaseModel):
     id: str
@@ -36,7 +40,6 @@ class ConversionTaskDetail(BaseModel):
     source_file_format: FileFormat
     target_file_format : FileFormat
     state : FileStatus
-    #date : datetime.date<
         
 class ConversionTask(BaseModel):
     user : str
