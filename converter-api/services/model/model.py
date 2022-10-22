@@ -11,10 +11,8 @@ class FileStatus(enum.Enum):
 
 class FileFormat(enum.Enum):
     MP3 = "MP3"
-    ACC = "ACC"
     OGG = "OGG"
     WAV = "WAV"
-    WMA = "WMA"
 
 class User(BaseModel):
     id : Optional[str]
