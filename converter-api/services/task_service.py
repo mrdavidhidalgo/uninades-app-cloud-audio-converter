@@ -49,7 +49,7 @@ def convert_file_task(task_repository: TaskRepository,
     _LOGGER.info("Se acaba de recibir el mensaje [%r] para ser procesado",conversion_task_detail)
 
     data_path = os.environ.get('DATA_PATH')
-    email_enable = os.environ.get('EMAIL_ENABLE')
+    email_enable = os.environ.get('EMAIL_ENABLE') == 'True'
     
     # conversion
     a=conversion_task_detail
@@ -117,8 +117,8 @@ def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use
 
 def send_mail(email, filename):
     _LOGGER.info("Sending email to %s",email)
-    gmail_user = 'formatconverter2022@gmail.com'
-    gmail_app_password = 'nxzrjnthplzaqaps'
+    gmail_user = 'fileconverter2022@gmail.com'
+    gmail_app_password = 'sldtehxsoxprxemj'
     sent_from = gmail_user
     sent_to = [email]
     sent_subject = "Your audio file has been converted"
