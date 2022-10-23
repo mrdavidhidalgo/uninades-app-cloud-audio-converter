@@ -1,6 +1,6 @@
 import abc
 
-from services.model.model import ConversionTaskDetail, ConversionTask, FileFormat,FileStatus
+from services.model.model import ConversionTaskDetail, ConversionTask, FileFormat,FileStatus, FileDetail
 from typing import List, Optional
 
 class TaskRepository(abc.ABC):
@@ -31,4 +31,8 @@ class TaskRepository(abc.ABC):
         
     @abc.abstractmethod
     def update_target_format_to_task(self, task_id: str, state : FileStatus, new_file_format = FileFormat ) -> None: 
+        ...
+        
+    @abc.abstractmethod
+    def get_file_path_by_user_and_file_name(self, file_name: str, user_id: str ) -> Optional[FileDetail]: 
         ...

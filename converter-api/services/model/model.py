@@ -37,7 +37,12 @@ class ConversionTaskDetail(BaseModel):
     source_file_path : str
     source_file_format: FileFormat
     target_file_format : FileFormat
+    target_file_path : Optional[str]
     state : FileStatus
+    
+class FileDetail(BaseModel):
+    file_path: str
+    is_converted : bool
         
 class ConversionTask(BaseModel):
     user : str

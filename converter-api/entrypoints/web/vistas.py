@@ -2,11 +2,10 @@
 
 from flask_restful import Resource
 from services import sign_service, task_service,logs
-from services.model.model import ConversionTaskDetailEncoder
 from services import exceptions
 from adapters import conversion_scheduler
 from repositorios import user_repository, task_repository
-from flask import request
+from flask import request, send_from_directory
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 import pydantic
 log = logs.get_logger()
@@ -62,6 +61,38 @@ class VistaLogin(Resource):
             return {"message": "User successfully logged in", "token": token_de_acceso, "id": user_id}
         except exceptions.UserOrPasswordInvalidError as e:
             return e.message, 400
+        
+class VistaFiles(Resource):
+    
+    @jwt_required()
+    def get(self, file_name: str):
+        try:
+            user_id = get_jwt_identity() 
+            log.info("Getting file with name [%s] from user %s",file_name, user_id)
+            
+            
+            file_dir = task_service.get_file_dir_by_name(task_repository=task_repository.TaskRepository(), 
+                                               user_id = user_id, 
+                                               file_name=file_name)
+            
+            return send_from_directory(file_dir,
+                                       file_name)
+                     
+        except task_service.ConverterException as e:
+            return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": e.message
+                    
+                    
+            }}, 400
+        except pydantic.ValidationError as e:
+            log.error(e)
+            return {"errors": [
+                    {
+                        "type": "/exceptions/InvalidFormat",
+                        "detail": error["msg"],
+                    }
+                    for error in e.errors()
+                ]}, 400
 
 class VistaTasks(Resource):
     
@@ -111,6 +142,7 @@ class VistaTasks(Resource):
                      "filename": data.source_file_path, 
                      "source_format": data.source_file_format.value, 
                      "target_file_format": data.target_file_format.value, 
+                     "target_file_path": data.target_file_path,
                      "status": data.state.value } 
                 for data in all_data]
             
@@ -159,7 +191,7 @@ class VistaTask(Resource):
                     
             }}, 400
         except pydantic.ValidationError as e:
-            print(e)
+            log.error(e)
             return {"errors": [
                     {
                         "type": "/exceptions/InvalidFormat",
@@ -211,10 +243,10 @@ class VistaTask(Resource):
         
         try: 
             user_id = get_jwt_identity() 
-            log.info("deleting task with id %s",task_id)
+            log.info("deleting task with idddddd %s",task_id)
             
+            task_service.delete_conversion_task(task_repository=task_repository.TaskRepository(), task_id=task_id, user_id=user_id)
             
-        
             return f"Task with id {task_id} was deleted successfully"
         
         except task_service.ConverterException as e:
@@ -223,6 +255,8 @@ class VistaTask(Resource):
                     
                     
             }}, 400
+            
+
         
             
 def extract_file_format(filename: str)-> task_service.FileFormat:
