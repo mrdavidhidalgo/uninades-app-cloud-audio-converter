@@ -1,7 +1,8 @@
+from genericpath import isfile
 from services.contracts.task_repository import TaskRepository
 from services.contracts.file_conversion_scheduler import FileConversionScheduler
 from pydantic import BaseModel
-from services.model.model import ConversionTask, FileFormat, ConversionTaskDetail, FileStatus
+from services.model.model import ConversionTask, FileDetail, FileFormat, ConversionTaskDetail, FileStatus
 from services import  logs
 import os
 import time
@@ -10,10 +11,43 @@ import ssl
 from typing import List, Optional
 import os
 
+CONVERTED_FILE_PATH: str = "/converted"
+
 class ConverterException(Exception):
     def __init__(self, *args: object, message: str) -> None:
         super().__init__(message, *args)
         self.message = message
+        
+class ConversionTaskDoesNotExistException(ConverterException):
+    def __init__(self, *args: object, task_id: str, user_id: str) -> None:
+        self.message = f"Task with id {task_id} for user {user_id} does not exist"
+        super().__init__(message = self.message, *args)
+        
+class FileDoesNotExistException(ConverterException):
+    def __init__(self, *args: object, file_name:str, user_id: str) -> None:
+        self.message = f"The filename {file_name} for user {user_id} does not exist"
+        super().__init__(message = self.message, *args)
+        
+class ConversionTaskAlreadyHasSpecificFormatException(ConverterException):
+    def __init__(self, *args: object, task_id: str) -> None:
+        self.message = f"Task with id {task_id} already is with current format"
+        super().__init__(message = self.message, *args)
+        
+class ConversionTaskStatusCannotBeUpdatedException(ConverterException):
+    def __init__(self, *args: object, task_id: str) -> None:
+        self.message = f"Task with id {task_id} already has the file with status UPLOADED"
+        super().__init__(message = self.message, *args)
+        
+class FileToConvertWithCurrentFormatException(ConverterException):
+    def __init__(self, *args: object, file_format: FileFormat) -> None:
+        self.message = f"File to convert already has {file_format} format"
+        super().__init__(message = self.message, *args)
+        
+class SourceFileDoesNotExistException(ConverterException):
+    def __init__(self, *args: object, file_name: str) -> None:
+        self.message = f"File with name {file_name} does not exist"
+        super().__init__(*args, message=self.message)
+        
 
 _LOGGER = logs.get_logger()
 class RegisterConversionTaskInput(BaseModel):
@@ -54,25 +88,55 @@ def get_tasks_by_user_id(task_repository: TaskRepository, user_id: str)->List[Co
 def get_task_by_id(task_repository: TaskRepository, user_id: str, task_id: int)->Optional[ConversionTaskDetail]:
     return task_repository.get_conversion_task_by_id(user_id = user_id, task_id=task_id)
 
+def delete_file(file_name: str, file_path: str)->None:
+    if not os.path.exists(file_path):
+        _LOGGER.info("Path does not exist %s", file_path)
+        raise SourceFileDoesNotExistException(file_name=file_name)
+    
+    _LOGGER.info("Deleting file with path %s", file_path)
+    
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
+def delete_converted_file_from_disk(file_name: str)->None:
+    
+    data_path : str = os.environ.get('DATA_PATH')
+    
+    file_path = "{}/{}/{}".format(data_path,CONVERTED_FILE_PATH,file_name)
+    
+    _LOGGER.info("Deleting converted file with path %s", file_path)
+    
+    delete_file(file_name=file_name, file_path=file_path)
+    
+    
+def delete_source_file_from_disk(file_name: str)->None:
+    
+    data_path = os.environ.get('DATA_PATH')
+    
+    file_path = data_path+"/"+file_name
+    
+    _LOGGER.info("Deleting source file with path %s", file_path)
+    
+    delete_file(file_name=file_name, file_path=file_path)
+    
+
 def update_target_format_to_conversion_task(task_repository: TaskRepository,conversion_scheduler : FileConversionScheduler, user_id: str, task_id: int, file_format : FileFormat )->ConversionTaskDetail:
     current_conversion = get_task_by_id(task_repository= task_repository, user_id = user_id, task_id=task_id)
     
     if current_conversion is None:
-        raise ConverterException(message=f"Task with id {task_id} for user {user_id} does not exist")
+        raise ConversionTaskDoesNotExistException(task_id=task_id, user_id=user_id)
     
     if current_conversion.target_file_format is file_format:
-        raise ConverterException(message=f"Task with id {task_id} already is with current format")
+        raise ConversionTaskAlreadyHasSpecificFormatException(task_id=task_id)
     
     if current_conversion.state is FileStatus.UPLOADED:
-        raise ConverterException(message=f"Task with id {task_id} already has the file with status UPLOADED")
+        raise ConversionTaskStatusCannotBeUpdatedException(task_id=task_id)
     
     if current_conversion.source_file_format is file_format:
-        raise ConverterException(message=f"File to convert already has this format")
+        raise FileToConvertWithCurrentFormatException(file_format=file_format)
     
-    #TODO Delete old file
-    #if os.path.isfile(current_conversion.targ):
-    #    os.remove(file_path)
-    #    print("File has been deleted")
+    delete_converted_file_from_disk(file_name = current_conversion.target_file_path)
+    
     # Update task
     task_repository.update_target_format_to_task(task_id=task_id, state = FileStatus.UPLOADED, new_file_format=file_format)
     
@@ -101,14 +165,18 @@ def delete_conversion_task(task_repository: TaskRepository,
     if conversion_task.state is FileStatus.UPLOADED:
         raise ConverterException(message = f"Task with id {task_id} is in progress state")
     
+    delete_converted_file_from_disk(file_name=conversion_task.target_file_path)
+    delete_source_file_from_disk(file_name=conversion_task.source_file_path)
+    
     task_repository.delete_conversion_task_by_id(task_id=task_id)
+
     
 
 def convert_file_task(task_repository: TaskRepository, 
                       conversion_task_detail : ConversionTaskDetail)-> None:
     
 
-    _LOGGER.info("Se acaba de recibir el mensaje [%r] para ser procesado",conversion_task_detail)
+    _LOGGER.info("File conversion task is requested [%r] to be processed",conversion_task_detail)
 
     data_path = os.environ.get('DATA_PATH')
     email_enable = os.environ.get('EMAIL_ENABLE') == 'True'
@@ -124,8 +192,17 @@ def convert_file_task(task_repository: TaskRepository,
     except Exception as e:
         _LOGGER.error(e)
         _LOGGER.error("Error at %s",e)
+        
+def get_file_dir_by_name(task_repository: TaskRepository, file_name: str, user_id : str)->str:
     
-    # enviar email
+    file_detail = task_repository.get_file_path_by_user_and_file_name(file_name=file_name, user_id=user_id)
+    
+    if file_detail is None:
+        raise FileDoesNotExistException(file_name=file_name, user_id=user_id)
+    
+    data_path : str = os.environ.get('DATA_PATH')
+    
+    return "{}/{}".format(data_path,CONVERTED_FILE_PATH) if file_detail.is_converted else "{}".format(data_path)
 
 def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email):
     

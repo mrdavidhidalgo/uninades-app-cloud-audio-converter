@@ -1,7 +1,9 @@
 from services.contracts import task_repository
-from services.model.model import ConversionTaskDetail, FileFormat, FileStatus, ConversionTask, ConversionTaskDetailEncoder
+from services.model.model import ConversionTaskDetail, FileDetail, FileFormat, FileStatus, ConversionTask, ConversionTaskDetailEncoder
 from repositorios.db_model import db_model
 from typing import List, Optional
+
+from sqlalchemy import or_
 
 class TaskRepository(task_repository.TaskRepository):
 
@@ -63,7 +65,8 @@ class TaskRepository(task_repository.TaskRepository):
                                     source_file_path=source_file.file_path,
                                     source_file_format=source_file.file_format,
                                     target_file_format=conversion_task.target_file_format, 
-                                    state = conversion_task.status)
+                                    state = conversion_task.status,
+                                    target_file_path=conversion_task.target_file_path)
         
 
     def change_target_file_format(self, task_id: str, target_file_format: FileFormat ) -> ConversionTaskDetail:
@@ -74,7 +77,14 @@ class TaskRepository(task_repository.TaskRepository):
                                     state = FileStatus.UPLOADED)
 
     def delete_conversion_task_by_id(self, task_id: str)-> None: 
-        db_model.ConversionTask.query.filter_by(id=task_id).delete()
+        
+        conversion_task : db_model.ConversionTask = db_model.ConversionTask.query.get(task_id)
+        
+        db_model.db.session.delete(conversion_task)
+        
+        source_file = db_model.SourceFile.query.get(conversion_task.source_file_id)
+        db_model.db.session.delete(source_file)
+        
         db_model.db.session.commit()
 
     def update_conversion_task(self, task_id: str,target_file_path: str, state : FileStatus ) -> None: 
@@ -92,4 +102,16 @@ class TaskRepository(task_repository.TaskRepository):
         
         db_model.db.session.add(conversion_task)
         db_model.db.session.commit()
+        
+    def get_file_path_by_user_and_file_name(self, file_name: str, user_id: str ) -> Optional[FileDetail]: 
+        
+        source_file : db_model.SourceFile = db_model.db.session.query(db_model.SourceFile).join(db_model.ConversionTask).filter(db_model.SourceFile.user_owner == user_id, or_(db_model.SourceFile.file_path == file_name, db_model.ConversionTask.target_file_path == file_name)).first()
+        if source_file is None:
+            return None
+        
+        conversion_task: db_model.ConversionTask = source_file.task[0]
+        
+        file_path = source_file.file_path if file_name == source_file.file_path else conversion_task.target_file_path
+
+        return FileDetail(file_path=file_path, is_converted=False if file_name == source_file.file_path else True)
         

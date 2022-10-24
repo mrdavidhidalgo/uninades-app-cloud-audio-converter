@@ -49,7 +49,7 @@ def create_app():
     api.add_resource(vistas.VistaLogin, '/api/auth/login')
     api.add_resource(vistas.VistaTasks, '/api/tasks')
     api.add_resource(vistas.VistaTask, '/api/tasks/<int:task_id>')
-    #api.add_resource(vistas.VistaFiles, '/api/files/<str:filename>')
+    api.add_resource(vistas.VistaFiles, '/api/files/<string:file_name>')
     
 
     if os.getenv('START_KAFKA_CONSUMER','False') == 'True':
