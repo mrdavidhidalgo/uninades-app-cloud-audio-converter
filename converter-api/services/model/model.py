@@ -39,6 +39,7 @@ class ConversionTaskDetail(BaseModel):
     target_file_format : FileFormat
     target_file_path : Optional[str]
     state : FileStatus
+    user_mail : Optional[str]
     
 class FileDetail(BaseModel):
     file_path: str

@@ -20,3 +20,9 @@ class UserRepository(user_repository.UserRepository):
 
     def get_user_by_username(self, username: str)-> Optional[User]:
         return db_model.User.query.filter(db_model.User.username == username).first()
+    
+    def get_user_by_mail(self, username: str)-> Optional[User]:
+        return db_model.User.query.filter(db_model.User.mail == mail).first()
+    
+    def get_user_by_id(self, id: str)-> Optional[User]:
+        return db_model.User.query.filter(db_model.User.id == id).first()

@@ -14,7 +14,7 @@ class VistaHealth(Resource):
 
     def get(self):
 
-        return {"msg": "Health Check"}
+        return {"msg": "Up"}
 
 class VistaSignUp(Resource):
     #@jwt_required()
@@ -111,6 +111,7 @@ class VistaTasks(Resource):
                                                              target_file_format=task_service.FileFormat[target_format], )
 
             task_id = task_service.register_conversion_task(task_repository=task_repository.TaskRepository(), 
+                                                            user_repository=user_repository.UserRepository(),
                                                             conversion_scheduler=conversion_scheduler.FileConversionScheduler(),
                                                             register_conversion_task_input=input_task)
 
