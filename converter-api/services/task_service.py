@@ -193,7 +193,7 @@ def convert_file_task(task_repository: TaskRepository,
                             data_path,data_path + "/converted",conversion_task_detail.user_mail,email_enable)
         if(b):
             task_repository.update_conversion_task(task_id=conversion_task_detail.id,
-                                            target_file_path=b, state=FileStatus.PROCESSED)
+                                            target_file_path=b, state=FileStatus.PROCESSED, task_duration = 100)
     except Exception as e:
         _LOGGER.error(e)
         _LOGGER.error("Error at %s",e)

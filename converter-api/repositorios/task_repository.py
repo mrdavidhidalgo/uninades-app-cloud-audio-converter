@@ -87,10 +87,11 @@ class TaskRepository(task_repository.TaskRepository):
         
         db_model.db.session.commit()
 
-    def update_conversion_task(self, task_id: str,target_file_path: str, state : FileStatus ) -> None: 
+    def update_conversion_task(self, task_id: str,target_file_path: str, state : FileStatus, task_duration: int ) -> None: 
         conversion_task : db_model.ConversionTask = db_model.ConversionTask.query.filter(db_model.ConversionTask.id == int(task_id)).first()
         conversion_task.target_file_path = target_file_path
         conversion_task.status = state
+        conversion_task.duration = task_duration
         
         db_model.db.session.add(conversion_task)
         db_model.db.session.commit()
