@@ -189,11 +189,15 @@ def convert_file_task(task_repository: TaskRepository,
     # conversion
     a=conversion_task_detail
     try:
+        now = int( time.time() )
         b=convert_file(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format,
                             data_path,data_path + "/converted",conversion_task_detail.user_mail,email_enable)
         if(b):
+            now2 = int( time.time() )
+            task_time = now2 - now
             task_repository.update_conversion_task(task_id=conversion_task_detail.id,
-                                            target_file_path=b, state=FileStatus.PROCESSED, task_duration = 100)
+                                            target_file_path=b, state=FileStatus.PROCESSED, task_duration = task_time)
+            _LOGGER.info("File converted in " + str(task_time) + " seconds")
     except Exception as e:
         _LOGGER.error(e)
         _LOGGER.error("Error at %s",e)
