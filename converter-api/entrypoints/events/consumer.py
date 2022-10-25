@@ -9,9 +9,7 @@ from services import  task_service,logs
 
 _LOGGER = logs.get_logger()
 
-_LOGGER.info("Iniciando Kafka consumer")
-
-def _send_message(conversion_task_detail: ConversionTaskDetail)->None:
+def _process_file_conversion(conversion_task_detail: ConversionTaskDetail)->None:
     
     task_service.convert_file_task(task_repository=task_repository.TaskRepository(), 
                       conversion_task_detail=conversion_task_detail)
@@ -19,7 +17,7 @@ def _send_message(conversion_task_detail: ConversionTaskDetail)->None:
 
 def start_consumer()->None:
     
-
+    _LOGGER.info("Starting Kafka consumer")
     try:
         consumer = KafkaConsumer(
             'file.conversion.requested',
@@ -35,7 +33,7 @@ def start_consumer()->None:
                 
                 message_to_send = message.value
                 _LOGGER.info(f"Taks {message_to_send.id} was received from kafka message-> {message_to_send}")
-                _send_message(message_to_send)
+                _process_file_conversion(message_to_send)
                 
             sleep(5) 
             _LOGGER.info("sleep kafka consumer")   

@@ -29,6 +29,7 @@ class ConversionTask(db.Model):
     target_file_path = db.Column(db.String(500))
     status = db.Column(db.Enum(FileStatus))
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    duration = db.Column(db.Integer, default = 0)
     
 class EnumADiccionario(fields.Field):
     #metodo de la clase

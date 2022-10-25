@@ -1,4 +1,5 @@
 from genericpath import isfile
+from repositorios.user_repository import UserRepository
 from services.contracts.task_repository import TaskRepository
 from services.contracts.file_conversion_scheduler import FileConversionScheduler
 from pydantic import BaseModel
@@ -59,6 +60,7 @@ class RegisterConversionTaskInput(BaseModel):
     
 
 def register_conversion_task(task_repository: TaskRepository, 
+                             user_repository: UserRepository,
                              conversion_scheduler : FileConversionScheduler,  
                              register_conversion_task_input: RegisterConversionTaskInput)-> str:
     
@@ -68,13 +70,16 @@ def register_conversion_task(task_repository: TaskRepository,
                    source_file_path=register_conversion_task_input.source_file_path, 
                    source_file_format=register_conversion_task_input.source_file_format,
                    target_file_format= register_conversion_task_input.target_file_format)
-
+    
+    user = user_repository.get_user_by_id(id = register_conversion_task_input.user_id)
+    
     task_id = task_repository.register_conversion_task(conversion_task=conversion_task)
     task_detail = ConversionTaskDetail(id =task_id, 
                                 source_file_format=conversion_task.source_file_format, 
                                 source_file_path=conversion_task.source_file_path, 
                                 target_file_format=conversion_task.target_file_format,
-                                state = FileStatus.UPLOADED)
+                                state = FileStatus.UPLOADED,
+                                user_mail=user.mail)
     
     
 
@@ -185,10 +190,10 @@ def convert_file_task(task_repository: TaskRepository,
     a=conversion_task_detail
     try:
         b=convert_file(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format,
-                            data_path,data_path + "/converted",'frankcandanoza@gmail.com',email_enable)
+                            data_path,data_path + "/converted",conversion_task_detail.user_mail,email_enable)
         if(b):
             task_repository.update_conversion_task(task_id=conversion_task_detail.id,
-                                            target_file_path=b, state=FileStatus.PROCESSED)
+                                            target_file_path=b, state=FileStatus.PROCESSED, task_duration = 100)
     except Exception as e:
         _LOGGER.error(e)
         _LOGGER.error("Error at %s",e)

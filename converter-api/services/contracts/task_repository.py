@@ -26,7 +26,7 @@ class TaskRepository(abc.ABC):
         ...
     
     @abc.abstractmethod
-    def update_conversion_task(self, task_id: str,target_file_path: str, state : FileStatus ) -> None: 
+    def update_conversion_task(self, task_id: str,target_file_path: str, state : FileStatus , task_duration: int) -> None: 
         ...
         
     @abc.abstractmethod

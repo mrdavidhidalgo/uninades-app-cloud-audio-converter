@@ -1,0 +1,711 @@
+{
+	"info": {
+		"_postman_id": "7f429308-994d-4de0-bbb9-0efc585950b9",
+		"name": "Converter API",
+		"description": "El modelo general de funcionamiento de la aplicación se basa en crear una cuenta en el portal web y acceder al administrador de archivos. Una vez la cuenta ha sido creada, el usuario puede subir archivos y solicitar el cambio de formato de estos para descargarlos. La aplicación web le permite a un usuario convertir archivos multimedia en línea de un formato a otro, seleccionando únicamente el formato destino.\n\n**La aplicación permite convertir entre los formatos de audio:**  \n`MP3 - OGG - WAV`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23990197"
+	},
+	"item": [
+		{
+			"name": "SignUp",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"f2.candanoza\",\n    \"mail\": \"frankcandanoza@gmail.com\",\n    \"password1\": \"123456\",\n    \"password2\": \"123456\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"signup"
+					]
+				},
+				"description": "**Permite crear una cuenta de usuario en el sistema**\n\n**Payload:**\n\n1.  **username: nombre de usuario**\n2.  **mail**: correo electrónico válido que será único en el sistema\n3.  **password1**: contraseña mínimo de 8 carácteres\n4.  **password2**: Confirmación de la contraseña\n    \n\nSe retorna un token de sesión si el usuario se autenticó de forma correcta, de lo  \ncontrario indica un error de autenticación y no permite crear la cuenta."
+			},
+			"response": [
+				{
+					"name": "SignUp with existent username",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"f.candanoza\",\n    \"mail\": \"frankcandanoza@gmail.com\",\n    \"password1\": \"123456\",\n    \"password2\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"status": "BAD REQUEST",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 01:02:05 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "115"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"errors\": {\n        \"type\": \"/exceptions/UserAlreadyExistError\",\n        \"detail\": \"There is a user with username [f.candanoza]\"\n    }\n}"
+				},
+				{
+					"name": "Successful SignUp",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"f2.candanoza\",\n    \"mail\": \"frankcandanoza@gmail.com\",\n    \"password1\": \"123456\",\n    \"password2\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 01:02:14 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "330"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"User was created succesfully\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU3MzMzNCwianRpIjoiYjBhZGNhMGEtNjZhOC00NzY4LTkzYzctM2I2YTdmMTA5NjVlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MzQsIm5iZiI6MTY2NjU3MzMzNCwiZXhwIjoxNjY2NTc0MjM0fQ.32I2jcTViEwwTQkeApswnB5_72ipo-PbIsCa0wmqJlg\",\n    \"id\": 34\n}"
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"f3.candanoza\",\n    \"password\": \"123456\"\n    \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				},
+				"description": "Permite recuperar el **token de autorización** para consumir los recursos del API suministrando un nombre de usuario y una contraseña correcta de una **cuenta registrada**.\n\n**Payload**:\n\n1.  **username**: User del usuario autenticar\n2.  **password**: password con el que se registró el usuario en la aplicación"
+			},
+			"response": [
+				{
+					"name": "Sucessfull Login",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"f.candanoza\",\n    \"password\": \"123456\"\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 01:01:43 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "326"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"User successfully logged in\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU3MzMwMywianRpIjoiOTRjNWY0MTAtNjYyOC00M2QwLWJlOTgtMTRiY2I0MmE0ZDg0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTczMzAzLCJleHAiOjE2NjY1NzQyMDN9.RghW5D1yuj6fHNdO469nnwlqrHkGjXzM48q-WTeyjsE\",\n    \"id\": 1\n}"
+				},
+				{
+					"name": "Failed Login",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"f3.candanoza\",\n    \"password\": \"123456\"\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"status": "BAD REQUEST",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 01:03:03 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "38"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "\"The username or password is invalid\""
+				}
+			]
+		},
+		{
+			"name": "Create conversion task",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU3MzMwMywianRpIjoiOTRjNWY0MTAtNjYyOC00M2QwLWJlOTgtMTRiY2I0MmE0ZDg0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTczMzAzLCJleHAiOjE2NjY1NzQyMDN9.RghW5D1yuj6fHNdO469nnwlqrHkGjXzM48q-WTeyjsE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU0ODA3MCwianRpIjoiMmZkNDZhZDYtZDAzMC00MzVjLWFjZGMtNWY3MTI5ODE2NjFlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTQ4MDcwLCJleHAiOjE2NjY1NDg5NzB9.BGD4oj3mTRVw2VAIkbo0KW5WvHPK8KUas1dN5dSxRsY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"fileName\": \"cancion.wav\",\n    \"newFormat\": \"WAV\"   \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"tasks"
+					]
+				},
+				"description": "Permite crear una nueva tarea de conversión de archivos para el usuario previamente logeado.\n\n**Requiere autenticación**: Si\n\n**Payload**:\n\n1.  **fileName**: Archivo a convertir (ruta del archivo a convertir)\n2.  **newFormat**: formato al que desea convertir el archivo. Los posibles formatos son `MP3 - OGG - WAV`\n    \n\nEn caso de enviar un formato no soportado el sistema no lo permitirá.\n\nEn caso de que el formato destino sea el mismo formato del archivo a convertir, se retornará validación del sistema."
+			},
+			"response": [
+				{
+					"name": "Successful task creation",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU0ODA3MCwianRpIjoiMmZkNDZhZDYtZDAzMC00MzVjLWFjZGMtNWY3MTI5ODE2NjFlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTQ4MDcwLCJleHAiOjE2NjY1NDg5NzB9.BGD4oj3mTRVw2VAIkbo0KW5WvHPK8KUas1dN5dSxRsY",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fileName\": \"cancion.wav\",\n    \"newFormat\": \"MP3\"   \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tasks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tasks"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 01:03:52 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "44"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Task with id [2] was created\"\n}"
+				},
+				{
+					"name": "Failed task creation with invalid format",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU0ODA3MCwianRpIjoiMmZkNDZhZDYtZDAzMC00MzVjLWFjZGMtNWY3MTI5ODE2NjFlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTQ4MDcwLCJleHAiOjE2NjY1NDg5NzB9.BGD4oj3mTRVw2VAIkbo0KW5WvHPK8KUas1dN5dSxRsY",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fileName\": \"cancion.wav3\",\n    \"newFormat\": \"MP3\"   \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/tasks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tasks"
+							]
+						}
+					},
+					"status": "BAD REQUEST",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 01:05:46 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "110"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": {\n        \"type\": \"/exceptions/ConverterException\",\n        \"detail\": \"Format [WAV3] not available for conversion\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get tasks by userId",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU2MTA4NiwianRpIjoiZTc0ODc0NWUtZTA2NC00OWQyLTg2NTItOTZiMTdkYWE2OTYxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTYxMDg2LCJleHAiOjE2NjY1NjE5ODZ9.jkFibpiVyXWrkltQKIQ4EczAeLhzcpr7s0tFoye_FKI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"tasks"
+					]
+				},
+				"description": "Permite recuperar la información de las tareas asociadas a un usuario. El usuario requiere  \nautorización."
+			},
+			"response": [
+				{
+					"name": "Token has expired",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/tasks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"tasks"
+							]
+						}
+					},
+					"status": "UNAUTHORIZED",
+					"code": 401,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "gunicorn"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 24 Oct 2022 20:06:26 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "close"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "28"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"msg\": \"Token has expired\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get task by id",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU2MTA4NiwianRpIjoiZTc0ODc0NWUtZTA2NC00OWQyLTg2NTItOTZiMTdkYWE2OTYxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTYxMDg2LCJleHAiOjE2NjY1NjE5ODZ9.jkFibpiVyXWrkltQKIQ4EczAeLhzcpr7s0tFoye_FKI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/tasks/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"tasks",
+						"1"
+					]
+				},
+				"description": "Permite recuperar la información de una tarea en la aplicación. El usuario requiere  \nautorización.\n\n**Paràmetros**:\n\n1.  **id_task**: Identificador de la tarea previamente registrada"
+			},
+			"response": []
+		},
+		{
+			"name": "Update conversion format",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjQxOTY1NiwianRpIjoiM2QzZjFkZWMtZDFlMy00OWZjLWIzMWMtNmY1Nzg1N2E3MDBjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NDE5NjU2LCJleHAiOjE2NjY0MjA1NTZ9.H0EpFJYAeDOqN5fIlmsmhj02DvMhpfFLiOwuW95_7Mo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"newFormat\": \"OGG\"   \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/tasks/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"tasks",
+						"2"
+					]
+				},
+				"description": "Permite actualizar la información de una tarea en la aplicación, le facilita al usuario  \nactualizar el formato de conversión de un archivo ya disponible en la aplicación. El  \nusuario requiere autorización.\n\nSólo será permitida la conversión si:\n\n1.  La conversión inicial finalizó\n2.  El formato del archivo destino es diferente al formato del archivo origen\n    \n\n**Parámetro**:\n\n**id_task**: Identificador de la tarea previamente creada\n\n**Payload**:\n\n**newFormat**: formato al que desea cambiarse el archivo"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete conversion task",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU2MTA4NiwianRpIjoiZTc0ODc0NWUtZTA2NC00OWQyLTg2NTItOTZiMTdkYWE2OTYxIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTYxMDg2LCJleHAiOjE2NjY1NjE5ODZ9.jkFibpiVyXWrkltQKIQ4EczAeLhzcpr7s0tFoye_FKI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/tasks/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"tasks",
+						"1"
+					]
+				},
+				"description": "Permite eliminar una tarea en la aplicación. El usuario requiere autorización.\n\nEsto eliminará el archivo origen y destino asociada a la tarea de conversión.\n\nEn caso de no haberse procesado, no se permitirá la eliminación.\n\n**Parámetros**:\n\n1.  **id_task**: Identificador de la tarea previamente creada en la aplicación."
+			},
+			"response": []
+		},
+		{
+			"name": "Get file",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU2MTQyNiwianRpIjoiNjc1MmJiNDktMTU2Zi00YzQ5LTg5YTgtNGY3ZTIyYmU5ZWE1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTYxNDI2LCJleHAiOjE2NjY1NjIzMjZ9.kLDMMwqA1Lmj6w7_Eqg3VUINOUhoc73mpVnW0M75p8M",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/files/cancion.waw",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"files",
+						"cancion.waw"
+					]
+				},
+				"description": "Permite recuperar el archivo original o procesado de un usuario dado su nombre origen o el nombre del archivo convertido. Requiere autorización.\n\n**Parámetros**:\n\n**filename**: Nombre del archivo a recuperar (original o convertido)"
+			},
+			"response": []
+		}
+	]
+}

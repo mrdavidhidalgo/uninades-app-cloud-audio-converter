@@ -8,6 +8,8 @@ from entrypoints.web import vistas
 from entrypoints.events import consumer
 # Importamos la BD
 from repositorios.db_model.db_model import db
+from datetime import timedelta
+
 
 def create_app(): 
     app = Flask(__name__)  #constructor con el nombre de la aplicación
@@ -30,6 +32,7 @@ def create_app():
 
     #JWT
     app.config['JWT_SECRET_KEY'] = 'frase-secreta'
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
     app.config['PROPAGATE_EXCEPTIONS'] = True
 
     app_context = app.app_context()
