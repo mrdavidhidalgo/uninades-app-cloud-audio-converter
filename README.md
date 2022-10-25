@@ -60,8 +60,8 @@ Con lo que el archivo de ejemplo musica.mp3 debe quedar en ./data/musica.mp3
 1. Crear el usuario
 
 `` 
-curl --location --request POST 'http://localhost:5000/api/auth/signup' \
---header 'Content-Type: application/json' \
+curl --location --request POST 'http://localhost:5000/api/auth/signup' 
+--header 'Content-Type: application/json' 
 --data-raw '{
     "username": "david",
     "mail": "david@gmail.com",
@@ -70,4 +70,19 @@ curl --location --request POST 'http://localhost:5000/api/auth/signup' \
 }'
 `` 
 
+2. Extraer el token de la solicitud anterior 
+3. Llamar el servicio tasks 
 
+`` 
+curl --location --request POST 'http://localhost:5000/api/tasks' 
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU3MzMwMywianRpIjoiOTRjNWY0MTAtNjYyOC00M2QwLWJlOTgtMTRiY2I0MmE0ZDg0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTczMzAzLCJleHAiOjE2NjY1NzQyMDN9.RghW5D1yuj6fHNdO469nnwlqrHkGjXzM48q-WTeyjsE' 
+--header 'Content-Type: application/json' 
+--data-raw '{
+    "fileName": "musica.mp3",
+    "newFormat": "WAV"   
+}'
+``
+
+**Nota:**
+Se debe incluir solo el nombre del archivo en la petición, para la petición el archivo estara en ./data/musica.mp3
+Luego el servicio retornara un identificador de la tarea creada
