@@ -7,23 +7,29 @@ Para correr el projecto es necesario tener Docker(docker-client y docker-compose
 Se deben abrir 3 terminales y correr los siguientes comandos
 
 #### Terminal Kafka
- `` 
+`` 
  docker compose up kafka
- `` 
- luego esperar a que suba el servidor correctamente
+`` 
+ 
+ Luego esperar a que suba el servidor correctamente
  
  #### Terminal Consumer-api
  `` 
  docker compose up consumer-api
  `` 
- luego esperar a que el consumidor suba
+ 
+ Luego esperar a que el consumidor suba
  
  #### Terminal Converter-api
  `` 
  docker compose up converter-api
  `` 
- luego esperar a que suba el API
  
+ Luego esperar a que suba el API, se puede verificar si esta arriba el servicio con el siguiente comando
+ 
+ `` 
+ WGET localhost:5000/health
+ `` 
  
  
 ### Forma 2 (No se recomienda)
@@ -33,7 +39,8 @@ Se deben abrir 3 terminales y correr los siguientes comandos
  `` 
  
  Para verificar si los servicios subieron se puede utilizar el siguiente comando:
-  `` 
+  
+ `` 
  docker ps
  `` 
  
@@ -44,5 +51,23 @@ Se deben abrir 3 terminales y correr los siguientes comandos
  4. Converter-api
  5. Consumer-api
  
-## Como enviar una petición?
- 
+## ¿Como enviar una petición?
+
+Para enviar una petición, antes se debe agregar el archivo a convertir al directorio ./data del repositorio.
+Con lo que el archivo de ejemplo musica.mp3 debe quedar en ./data/musica.mp3
+
+### Pasos
+1. Crear el usuario
+
+`` 
+curl --location --request POST 'http://localhost:5000/api/auth/signup' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "david",
+    "mail": "david@gmail.com",
+    "password1": "123456",
+    "password2": "123456"
+}'
+`` 
+
+
