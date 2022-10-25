@@ -87,4 +87,4 @@ curl --location --request POST 'http://localhost:5000/api/tasks'
 Se debe incluir solo el nombre del archivo en la petición, para la petición el archivo estara en ./data/musica.mp3
 Luego el servicio retornara un identificador de la tarea creada.
 
-Para mas información sobre los demas recursos rest se incluye un coleccion de postman. 
+Para mas información sobre los demas recursos rest se incluye un coleccion de postman. [Postman](https://github.com/mrdavidhidalgo/uninades-app-cloud-audio-converter/blob/master/Converter_API.postman_collection)
