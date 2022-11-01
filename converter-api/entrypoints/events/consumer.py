@@ -6,7 +6,7 @@ from services import logs
 import json
 from repositorios import  task_repository
 from services import  task_service,logs
-
+import os
 _LOGGER = logs.get_logger()
 
 def _process_file_conversion(conversion_task_detail: ConversionTaskDetail)->None:
@@ -19,13 +19,23 @@ def start_consumer()->None:
     
     _LOGGER.info("Starting Kafka consumer")
     try:
+        bootstrap_servers = os.getenv("bootstrap_servers","kafka:9092")
+        sasl_plain_username= os.getenv("sasl_plain_username","user")#se debe colocar el user
+        sasl_plain_password=os.getenv("sasl_plain_password","kTm5cVvQ4reC")#se debe especificar contraseña
+        security_protocol=os.getenv("security_protocol","SASL_PLAINTEXT")
+        sasl_mechanism=os.getenv("sasl_mechanism","PLAIN")
         consumer = KafkaConsumer(
             'file.conversion.requested',
-            bootstrap_servers=['kafka:9092'],
+            bootstrap_servers=[bootstrap_servers],
             auto_offset_reset='earliest',
             enable_auto_commit=True,
             client_id='docker-client',
             group_id='my-group',
+            sasl_plain_username=sasl_plain_username,
+            sasl_plain_password=sasl_plain_password,
+            security_protocol=security_protocol,
+            security_protocol=security_protocol,
+            sasl_mechanism=sasl_mechanism,          
             value_deserializer=lambda x: ConversionTaskDetail(**json.loads(x.decode('utf-8'))))
         
         while True:
