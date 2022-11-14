@@ -34,7 +34,6 @@ def start_consumer()->None:
             sasl_plain_username=sasl_plain_username,
             sasl_plain_password=sasl_plain_password,
             security_protocol=security_protocol,
-            security_protocol=security_protocol,
             sasl_mechanism=sasl_mechanism,          
             value_deserializer=lambda x: ConversionTaskDetail(**json.loads(x.decode('utf-8'))))
         

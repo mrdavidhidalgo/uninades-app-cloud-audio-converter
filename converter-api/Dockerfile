@@ -5,7 +5,7 @@ RUN apk add build-base
 RUN apk add sox
 RUN apk add lame
 ADD requirements.txt .
-RUN pip install -r ./requirements.txt
+RUN pip3 install -r ./requirements.txt
 
 ADD . .
 ENV PORT 5000

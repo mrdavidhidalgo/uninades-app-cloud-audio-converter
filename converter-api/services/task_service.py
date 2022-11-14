@@ -11,6 +11,7 @@ import smtplib
 import ssl
 from typing import List, Optional
 import os
+from google.cloud import storage
 
 CONVERTED_FILE_PATH: str = "/converted"
 
@@ -185,19 +186,23 @@ def convert_file_task(task_repository: TaskRepository,
 
     data_path = os.environ.get('DATA_PATH')
     email_enable = os.environ.get('EMAIL_ENABLE') == 'True'
+     #cambio
+    bucket_path = os.environ.get('BUCKET_PATH')
     
     # conversion
     a=conversion_task_detail
     try:
-        now = int( time.time() )
-        b=convert_file(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format,
-                            data_path,data_path + "/converted",conversion_task_detail.user_mail,email_enable)
+        now =  time.time()
+        #cambio
+        #b=convert_file(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format,                             data_path,data_path + "/converted",conversion_task_detail.user_mail,email_enable)
+        b=convert_file(a.source_file_path,a.source_file_path, a.source_file_format,a.target_file_format,                             data_path,data_path + "/converted",conversion_task_detail.user_mail,email_enable, bucket_path)
+
         if(b):
-            now2 = int( time.time() )
-            task_time = now2 - now
+            now2 = time.time()
+            task_time = int((now2*1000) - (now*1000))
             task_repository.update_conversion_task(task_id=conversion_task_detail.id,
                                             target_file_path=b, state=FileStatus.PROCESSED, task_duration = task_time)
-            _LOGGER.info("File converted in " + str(task_time) + " seconds")
+            _LOGGER.info("File converted in " + str(task_time) + " miliseconds")
     except Exception as e:
         _LOGGER.error(e)
         _LOGGER.error("Error at %s",e)
@@ -213,13 +218,15 @@ def get_file_dir_by_name(task_repository: TaskRepository, file_name: str, user_i
     
     return "{}/{}".format(data_path,CONVERTED_FILE_PATH) if file_detail.is_converted else "{}".format(data_path)
 
-def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email):
-    
+#def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email):
+def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email, ruta_deposito):
     aux = origen2.split(".")
     origen = aux[0]
     destino = origen
     _LOGGER.info("origen=%s, destino=%s, formato1=%s, formato2=%s, ruta1=%s, ruta2=%s,email=%s",origen, destino, formato1, formato2, ruta1, ruta2,email)
     comando = "/usr/bin/sox "
+    #cambio
+    comando2 = "/usr/bin/gsutil cp "
     parametros=""
     entrada= formato1.value
     salida= formato2.value
@@ -233,26 +240,42 @@ def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use
 
 
     if (entrada == "WAV"):
+        formato_entrada=".wav" #cambio
         if(salida == "MP3"):
             parametros=" -t wav -r 8000 -c 1 " + ruta1 +"/" + origen + ".wav -t mp3 " + ruta2 +"/"  + destino + ".mp3"
         if(salida == "OGG"):
             parametros=ruta1 + "/" + origen + ".wav -r 22050 " + ruta2 +"/" + destino + ".ogg"
 
     if (entrada == "MP3"):
+        formato_entrada=".mp3" #cambio
         if(salida == "WAV"):
             parametros=ruta1 + "/" + origen + ".mp3 -r 8000 -c1 " + ruta2 +"/" + destino + ".wav"
         if(salida == "OGG"):
             parametros=ruta1 + "/" + origen + ".mp3 " + ruta2 +"/" + destino + ".ogg"
 
     if (entrada == "OGG"):
+        formato_entrada=".ogg" #cambio
         if(salida == "WAV"):
             parametros=ruta1 + "/" + origen + ".ogg " + ruta2 +"/" + destino + ".wav"
         if(salida == "MP3"):
             parametros=ruta1 + "/" + origen + ".ogg " + ruta2 +"/" + destino + ".mp3"
 
+    #cambio
+    if(salida == "MP3"):
+        formato_salida=".mp3"
+    if(salida == "WAV"):
+        formato_salida=".wav"
+    if(salida == "OGG"):
+        formato_salida=".ogg"
+
+    parametros2=  ruta2 +"/" + destino + formato_salida +" gs://" +  ruta_deposito + "/converted/";
+
     if(len(parametros) > 0):
         _LOGGER.info("Executing " + comando + " " + parametros)
         os.system(comando + parametros)
+        #para copiar al repos
+       #os.system(comando2 + parametros2)
+        upload_file_bucket(ruta_deposito, ruta2 +"/" + destino + formato_salida , "/converted/" + destino + formato_salida)
         if use_email:
            if(len(email) > 2):
                _LOGGER.info("Sending confirmation to %s", email)
@@ -261,6 +284,23 @@ def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use
     else:
         _LOGGER.info("Formats not supported " + entrada + " to " + salida)
         return False
+
+
+#cambio
+def upload_file_bucket(bucket_name, contents, destination_file):
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_file)
+
+    blob.upload_from_string(contents)
+
+    print(
+       # f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}."
+        _LOGGER.info("{destination_file} with contents {contents} uploaded to {bucket_name}.")
+    )
+
+
 
 def send_mail(email, filename):
     _LOGGER.info("Sending email to %s",email)
