@@ -2,6 +2,7 @@ from genericpath import isfile
 from repositorios.user_repository import UserRepository
 from services.contracts.task_repository import TaskRepository
 from services.contracts.file_conversion_scheduler import FileConversionScheduler
+from services.contracts.file_manager import FileManager
 from pydantic import BaseModel
 from services.model.model import ConversionTask, FileDetail, FileFormat, ConversionTaskDetail, FileStatus
 from services import  logs
@@ -52,6 +53,11 @@ class SourceFileDoesNotExistException(ConverterException):
         self.message = f"File with name {file_name} does not exist"
         super().__init__(*args, message=self.message)
         
+class BadConfigurationForFileStorageException(ConverterException):
+    def __init__(self, *args: object, message: str) -> None:
+        self.message =message
+        super().__init__(*args, message=self.message)
+        
 
 _LOGGER = logs.get_logger()
 class RegisterConversionTaskInput(BaseModel):
@@ -65,7 +71,9 @@ class RegisterConversionTaskInput(BaseModel):
 def register_conversion_task(task_repository: TaskRepository, 
                              user_repository: UserRepository,
                              conversion_scheduler : FileConversionScheduler,  
-                             register_conversion_task_input: RegisterConversionTaskInput)-> str:
+                             register_conversion_task_input: RegisterConversionTaskInput, 
+                             file_manager : FileManager,
+                             file: bytes, file_name: str)-> str:
     
     #TODO Validate if file exist
 
@@ -84,8 +92,8 @@ def register_conversion_task(task_repository: TaskRepository,
                                 state = FileStatus.UPLOADED,
                                 user_mail=user.mail)
     
+    file_manager.save_file(path= register_conversion_task_input.source_file_path, file = file ,file_name=file_name)
     
-
     conversion_scheduler.schedule_conversion_task(conversion_task=task_detail)
 
     return task_id

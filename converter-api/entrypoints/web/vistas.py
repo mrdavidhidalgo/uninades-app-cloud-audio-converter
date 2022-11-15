@@ -3,12 +3,16 @@
 from flask_restful import Resource
 from services import sign_service, task_service,logs
 from services import exceptions
-from adapters import conversion_scheduler
+from adapters import conversion_scheduler, gcp_bucket, local_storage
 from repositorios import user_repository, task_repository
 from flask import request, send_from_directory
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from werkzeug.utils import secure_filename
 import pydantic
+import os
 log = logs.get_logger()
+
+GCP_STORAGE_FILE_MANAGER = "GCP_STORAGE"
 
 class VistaHealth(Resource):
 
@@ -102,18 +106,39 @@ class VistaTasks(Resource):
         try:
             user_id = get_jwt_identity() 
             log.info("Creating task for %s",user_id)
-            target_format = request.json["newFormat"]
+            target_format = request.form["newFormat"]
+            name = request.form["fileName"]
+            file = request.files['file']
+            if 'file' not in request.files or not file.filename:
+                return {"error": {"type": "/exceptions/ConverterException",
+                        "detail": "Debe cargar un archivo para conversión"}}
+            
+            #Aquí necesitamos enviarlo a disco
+            """
+            file.save(f"{data_path}/{name}")
+            
+            """
+            file.stream.seek(0)
+            audio = file.read()
+            print(f"Tipo {type(audio)}")
+            
+            file_manager = os.environ.get('FILE_MANAGER', GCP_STORAGE_FILE_MANAGER)
+            
+            
             validate_file_format(format = target_format)
             
             input_task = task_service.RegisterConversionTaskInput(user_id=user_id, 
-                                                             source_file_path=request.json["fileName"], 
-                                                             source_file_format=extract_file_format(request.json["fileName"]),
+                                                             source_file_path=name, 
+                                                             source_file_format=extract_file_format(request.form["fileName"]),
                                                              target_file_format=task_service.FileFormat[target_format], )
 
             task_id = task_service.register_conversion_task(task_repository=task_repository.TaskRepository(), 
                                                             user_repository=user_repository.UserRepository(),
                                                             conversion_scheduler=conversion_scheduler.FileConversionScheduler(),
-                                                            register_conversion_task_input=input_task)
+                                                            register_conversion_task_input=input_task,
+                                                            #file_manager=gcp_bucket.GCPBucket(),
+                                                            file_manager=gcp_bucket.GCPBucket() if file_manager == GCP_STORAGE_FILE_MANAGER else local_storage.LocalStorage(),
+                                                            file=audio, file_name= name)
 
             return {"message": f"Task with id [{task_id}] was created"}
         except task_service.ConverterException as e:
@@ -244,7 +269,7 @@ class VistaTask(Resource):
         
         try: 
             user_id = get_jwt_identity() 
-            log.info("deleting task with idddddd %s",task_id)
+            log.info("deleting task with id %s",task_id)
             
             task_service.delete_conversion_task(task_repository=task_repository.TaskRepository(), task_id=task_id, user_id=user_id)
             
