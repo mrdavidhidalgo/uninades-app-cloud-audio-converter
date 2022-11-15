@@ -19,7 +19,7 @@ class GCPBucket(file_manager.FileManager):
     def save_file(self, path: str, file_name: str, file: bytes) -> str:
         
         self._save_local(path=path, file = file)
-        self._save_gcp_bucket(source_path=path, file_name = file_name)
+        self._save_gcp_bucket(source_path=path, file_name = file_name, file=file)
         
     def get_file(self, path: str, file: bytes) -> None:
         return super().get_file(path, file)
@@ -30,7 +30,7 @@ class GCPBucket(file_manager.FileManager):
         binary_file.write(file)
         binary_file.close()
         
-    def _save_gcp_bucket(self, source_path: str, file_name: str) -> None:
+    def _save_gcp_bucket(self, source_path: str, file_name: str, file: bytes) -> None:
         
         print(
         # f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}."
@@ -41,7 +41,7 @@ class GCPBucket(file_manager.FileManager):
         bucket = storage_client.bucket(self._bucket_path)
         blob = bucket.blob(file_name)
 
-        blob.upload_from_string(source_path)
+        blob.upload_from_string(conten_type="application/octet-stream", data= file)
 
         
         
