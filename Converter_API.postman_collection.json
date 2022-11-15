@@ -4,7 +4,7 @@
 		"name": "Converter API",
 		"description": "El modelo general de funcionamiento de la aplicación se basa en crear una cuenta en el portal web y acceder al administrador de archivos. Una vez la cuenta ha sido creada, el usuario puede subir archivos y solicitar el cambio de formato de estos para descargarlos. La aplicación web le permite a un usuario convertir archivos multimedia en línea de un formato a otro, seleccionando únicamente el formato destino.\n\n**La aplicación permite convertir entre los formatos de audio:**  \n`MP3 - OGG - WAV`",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "23990197"
+		"_exporter_id": "786244"
 	},
 	"item": [
 		{
@@ -319,7 +319,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU3MzMwMywianRpIjoiOTRjNWY0MTAtNjYyOC00M2QwLWJlOTgtMTRiY2I0MmE0ZDg0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTczMzAzLCJleHAiOjE2NjY1NzQyMDN9.RghW5D1yuj6fHNdO469nnwlqrHkGjXzM48q-WTeyjsE",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2ODQ5MTQwNSwianRpIjoiOTY0MGQ2OWQtYWNhNy00ZjZlLThhNDktZDAyMTU2NDFkNGQ2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MiwibmJmIjoxNjY4NDkxNDA1LCJleHAiOjE2Njg0OTg2MDV9.MKsYMfP8U3uQNoiFgYpDITASD5Y8XzWYamqF1Z2UOhk",
 							"type": "string"
 						}
 					]
@@ -333,21 +333,35 @@
 					}
 				],
 				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"fileName\": \"cancion.wav\",\n    \"newFormat\": \"WAV\"   \n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "fileName",
+							"value": "primera.mp3",
+							"type": "text"
+						},
+						{
+							"key": "newFormat",
+							"value": "WAV",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/franklin.candanoza/Downloads/Micaela.mp3"
 						}
-					}
+					]
 				},
 				"url": {
-					"raw": "http://localhost:5000/api/tasks",
+					"raw": "http://35.211.16.98:80/api/tasks",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"35",
+						"211",
+						"16",
+						"98"
 					],
-					"port": "5000",
+					"port": "80",
 					"path": [
 						"api",
 						"tasks"
@@ -683,7 +697,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2NjU2MTQyNiwianRpIjoiNjc1MmJiNDktMTU2Zi00YzQ5LTg5YTgtNGY3ZTIyYmU5ZWE1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjY2NTYxNDI2LCJleHAiOjE2NjY1NjIzMjZ9.kLDMMwqA1Lmj6w7_Eqg3VUINOUhoc73mpVnW0M75p8M",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2ODQ5ODkzMiwianRpIjoiMWVjZTlhY2MtOWI5NC00MzM3LTk1MzYtNTE3YTE3MzY3MTc3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MiwibmJmIjoxNjY4NDk4OTMyLCJleHAiOjE2Njg1MDYxMzJ9.1SLXzq6UQAMG1-7Jbek87bV9JpDns0VfO4sT0Ei5wrQ",
 							"type": "string"
 						}
 					]
@@ -691,16 +705,19 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:5000/api/files/cancion.waw",
+					"raw": "http://35.211.16.98:80/api/files/primera.mp3",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"35",
+						"211",
+						"16",
+						"98"
 					],
-					"port": "5000",
+					"port": "80",
 					"path": [
 						"api",
 						"files",
-						"cancion.waw"
+						"primera.mp3"
 					]
 				},
 				"description": "Permite recuperar el archivo original o procesado de un usuario dado su nombre origen o el nombre del archivo convertido. Requiere autorización.\n\n**Parámetros**:\n\n**filename**: Nombre del archivo a recuperar (original o convertido)"
