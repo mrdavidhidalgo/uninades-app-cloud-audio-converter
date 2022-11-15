@@ -71,11 +71,14 @@ class VistaFiles(Resource):
     @jwt_required()
     def get(self, file_name: str):
         try:
+            
             user_id = get_jwt_identity() 
             log.info("Getting file with name [%s] from user %s",file_name, user_id)
             
+            file_manager = os.environ.get('FILE_MANAGER', GCP_STORAGE_FILE_MANAGER)
             
             file_dir = task_service.get_file_dir_by_name(task_repository=task_repository.TaskRepository(), 
+                                               file_manager=gcp_bucket.GCPBucket() if file_manager == GCP_STORAGE_FILE_MANAGER else local_storage.LocalStorage(),          
                                                user_id = user_id, 
                                                file_name=file_name)
             

@@ -18,30 +18,30 @@ class GCPBucket(file_manager.FileManager):
     
     def save_file(self, path: str, file_name: str, file: bytes) -> str:
         
-        self._save_local(path=path, file = file)
-        self._save_gcp_bucket(source_path=path, file_name = file_name, file=file)
-        
-    def get_file(self, path: str, file: bytes) -> None:
-        return super().get_file(path, file)
-        
-    def _save_local(self, path: str, file:bytes)->None:
-        
-        binary_file = open(path, "wb")
-        binary_file.write(file)
-        binary_file.close()
-        
-    def _save_gcp_bucket(self, source_path: str, file_name: str, file: bytes) -> None:
-        
         print(
         # f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}."
-            _LOGGER.info(f"{file_name} with contents {source_path} uploaded to {self._bucket_path}.")
+            _LOGGER.info(f"{file_name} uploaded to {self._bucket_path}.")
         )
         
         storage_client = storage.Client()
         bucket = storage_client.bucket(self._bucket_path)
         blob = bucket.blob(file_name)
 
-        blob.upload_from_string(conten_type="application/octet-stream", data= file)
+        blob.upload_from_string(content_type="application/octet-stream", data= file)
+        
+    def get_file(self, path: str, destination_file : str) -> None:
+        storage_client = storage.Client()
+
+        bucket = storage_client.bucket(self._bucket_path)
+        file = bucket.blob(path)
+        file.download_to_filename(destination_file)
+
+        print(
+            "Downloaded storage object {} from bucket {} to local file {}.".format(
+                path, self._bucket_path, destination_file
+            )
+        )
+          
 
         
         

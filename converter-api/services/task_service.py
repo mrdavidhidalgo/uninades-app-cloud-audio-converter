@@ -15,6 +15,8 @@ import os
 from google.cloud import storage
 import sendgrid
 from sendgrid.helpers.mail import Mail, Email, To, Content
+import uuid
+
 
 CONVERTED_FILE_PATH: str = "/converted"
 
@@ -217,16 +219,22 @@ def convert_file_task(task_repository: TaskRepository,
         _LOGGER.error(e)
         _LOGGER.error("Error at %s",e)
         
-def get_file_dir_by_name(task_repository: TaskRepository, file_name: str, user_id : str)->str:
+def get_file_dir_by_name(task_repository: TaskRepository, file_name: str, user_id : str, file_manager : FileManager)->str:
     
     file_detail = task_repository.get_file_path_by_user_and_file_name(file_name=file_name, user_id=user_id)
-    
+
     if file_detail is None:
         raise FileDoesNotExistException(file_name=file_name, user_id=user_id)
-    
+
     data_path : str = os.environ.get('DATA_PATH')
-    
-    return "{}/{}".format(data_path,CONVERTED_FILE_PATH) if file_detail.is_converted else "{}".format(data_path)
+
+    from_bucket = "{}/{}".format(CONVERTED_FILE_PATH,file_name) if file_detail.is_converted else "{}".format(file_name)
+
+    _LOGGER.info("Buscando final en el bucket %s para almacenar en %s", from_bucket, data_path)
+
+    file_manager.get_file(path=from_bucket, destination_file="{}/{}".format(data_path, file_name))
+
+    return data_path
 
 #def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email):
 def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use_email, ruta_deposito):
