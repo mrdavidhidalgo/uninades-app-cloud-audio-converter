@@ -281,6 +281,7 @@ def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use
     parametros2=  ruta2 +"/" + destino + formato_salida +" gs://" +  ruta_deposito + "/converted/";
 
     if(len(parametros) > 0):
+        download_file_bucket(ruta_deposito, origen + formato_entrada , "/tmp/data/" + origen + formato_entrada )
         _LOGGER.info("Executing " + comando + " " + parametros)
         os.system(comando + parametros)
         #para copiar al repos
@@ -295,6 +296,20 @@ def convert_file (origen2, destino2, formato1, formato2, ruta1, ruta2,email, use
         _LOGGER.info("Formats not supported " + entrada + " to " + salida)
         return False
 
+#cambio
+def download_file_bucket(bucket_name, source_file, destination_file):
+
+    storage_client = storage.Client()
+
+    bucket = storage_client.bucket(bucket_name)
+    file = bucket.blob(source_file)
+    file.download_to_filename(destination_file)
+
+    print(
+         "Downloaded storage object {} from bucket {} to local file {}.".format(
+            source_file, bucket_name, destination_file
+        )
+    )
 
 #cambio
 def upload_file_bucket(bucket_name, contents, destination_file):
