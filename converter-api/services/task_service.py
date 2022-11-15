@@ -12,6 +12,8 @@ import ssl
 from typing import List, Optional
 import os
 from google.cloud import storage
+import sendgrid
+from sendgrid.helpers.mail import Mail, Email, To, Content
 
 CONVERTED_FILE_PATH: str = "/converted"
 
@@ -301,8 +303,29 @@ def upload_file_bucket(bucket_name, contents, destination_file):
     )
 
 
-
 def send_mail(email, filename):
+    sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+    from_e = os.environ.get('EMAIL_SENDER')
+    print(from_e + " \n")
+    #formatconverter15@gmail.com
+    from_email = Email(from_e)  # Change to your verified sender
+    to_email = To(email)  # Change to your recipient
+    subject = "Your audio file has been converted"
+
+    content = Content("text/plain", "Hi\n\n Audio file " +  filename + " has been converted\n\nRegards\nAudio-converter-app\n")
+    mail = Mail(from_email, to_email, subject, content)
+
+    # Get a JSON-ready representation of the Mail object
+    mail_json = mail.get()
+
+    # Send an HTTP POST request to /mail/send
+    response = sg.client.mail.send.post(request_body=mail_json)
+    #print(response.status_code)
+    #print(response.headers)
+    _LOGGER.info(response.status_code)
+    _LOGGER.info(response.headers)
+
+def send_mail_old(email, filename):
     _LOGGER.info("Sending email to %s",email)
     gmail_user = 'fileconverter2022@gmail.com'
     gmail_app_password = 'sldtehxsoxprxemj'
