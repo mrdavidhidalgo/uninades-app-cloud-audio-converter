@@ -3,7 +3,7 @@
 from flask_restful import Resource
 from services import sign_service, task_service,logs
 from services import exceptions
-from adapters import conversion_scheduler, gcp_bucket, local_storage
+from adapters import gcp_bucket, kafka_conversion_scheduler, local_storage, gcp_conversion_scheduler
 from repositorios import user_repository, task_repository
 from flask import request, send_from_directory
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
@@ -137,7 +137,8 @@ class VistaTasks(Resource):
 
             task_id = task_service.register_conversion_task(task_repository=task_repository.TaskRepository(), 
                                                             user_repository=user_repository.UserRepository(),
-                                                            conversion_scheduler=conversion_scheduler.FileConversionScheduler(),
+                                                            #conversion_scheduler=kafka_conversion_scheduler.FileKafkaConversionScheduler(),
+                                                            conversion_scheduler=gcp_conversion_scheduler.FileGCPPubSubConversionScheduler(),
                                                             register_conversion_task_input=input_task,
                                                             #file_manager=gcp_bucket.GCPBucket(),
                                                             file_manager=gcp_bucket.GCPBucket() if file_manager == GCP_STORAGE_FILE_MANAGER else local_storage.LocalStorage(),
@@ -240,7 +241,7 @@ class VistaTask(Resource):
             validate_file_format(format = target_format)
             
             data = task_service.update_target_format_to_conversion_task(task_repository=task_repository.TaskRepository(),
-                                                                        conversion_scheduler=conversion_scheduler.FileConversionScheduler(), 
+                                                                        conversion_scheduler=kafka_conversion_scheduler.FileKafkaConversionScheduler(), 
                                                                         user_id = user_id, 
                                                                         task_id=task_id, 
                                                                         file_format= task_service.FileFormat[target_format] )
