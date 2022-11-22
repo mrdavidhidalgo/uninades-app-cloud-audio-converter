@@ -325,9 +325,12 @@ def upload_file_bucket(bucket_name, contents, destination_file):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_file)
-
-    blob.upload_from_string(contents)
-
+    in_file = open(contents, "rb") # opening for [r]eading as [b]inary
+    file = in_file.read()
+ 
+    blob.upload_from_string(content_type="application/octet-stream", data=file)
+    in_file.close()
+ 
     print(
        # f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}."
         _LOGGER.info("{destination_file} with contents {contents} uploaded to {bucket_name}.")

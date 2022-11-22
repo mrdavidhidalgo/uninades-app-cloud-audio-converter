@@ -18,16 +18,20 @@ class GCPBucket(file_manager.FileManager):
     
     def save_file(self, path: str, file_name: str, file: bytes) -> str:
         
-        print(
-        # f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}."
-            _LOGGER.info(f"{file_name} uploaded to {self._bucket_path}.")
-        )
         
+        # f"{destination_blob_name} with contents {contents} uploaded to {bucket_name}."
+        _LOGGER.info(f"{file_name} uploaded to {self._bucket_path}.")
+        
+        _LOGGER.info("Bucket starting")
         storage_client = storage.Client()
+        _LOGGER.info("client storaged and before bucket")
         bucket = storage_client.bucket(self._bucket_path)
+        _LOGGER.info("after bucket")
         blob = bucket.blob(file_name)
+        _LOGGER.info("After blob")
 
         blob.upload_from_string(content_type="application/octet-stream", data= file)
+        _LOGGER.info("Bucket file uploaded finish")
         
     def get_file(self, path: str, destination_file : str) -> None:
         storage_client = storage.Client()

@@ -121,9 +121,12 @@ class VistaTasks(Resource):
             file.save(f"{data_path}/{name}")
             
             """
+            log.info("before seek")
             file.stream.seek(0)
+            log.info("before red")
             audio = file.read()
-            print(f"Tipo {type(audio)}")
+            log.info("after red")
+            
             
             file_manager = os.environ.get('FILE_MANAGER', GCP_STORAGE_FILE_MANAGER)
             
