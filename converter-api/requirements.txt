@@ -26,3 +26,4 @@ psycopg2-binary==2.9.4
 pydantic==1.10.2
 kafka-python==2.0.2
 sendgrid==6.9.7
+google-cloud-pubsub==2.13.11

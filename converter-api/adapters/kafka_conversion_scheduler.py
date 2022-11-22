@@ -1,13 +1,10 @@
 from services.contracts import file_conversion_scheduler
-from services.model.model import ConversionTaskDetail, FileFormat, FileStatus, ConversionTask
-from repositorios.db_model import db_model
-from typing import List 
-from json import dumps
-from kafka import KafkaProducer,KafkaConsumer
+from services.model.model import ConversionTaskDetail
+from kafka import KafkaProducer
 from  services import logs 
 import os
 log = logs.get_logger()
-class FileConversionScheduler(file_conversion_scheduler.FileConversionScheduler):
+class FileKafkaConversionScheduler(file_conversion_scheduler.FileConversionScheduler):
 
 
     def __init__(self):

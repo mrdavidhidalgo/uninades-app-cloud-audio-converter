@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 import os
 from entrypoints.web import vistas
-from entrypoints.events import consumer
+from entrypoints.events import kafka_consumer, gcp_pubsub_subscriber
 # Importamos la BD
 from repositorios.db_model.db_model import db
 from datetime import timedelta
@@ -55,8 +55,13 @@ def create_app():
     api.add_resource(vistas.VistaFiles, '/api/files/<string:file_name>')
     
 
+
+
     if os.getenv('START_KAFKA_CONSUMER','False') == 'True':
-        consumer.start()
+        gcp_pubsub_subscriber.start()
+        #kafka_consumer.start()
+        
+    
     
     
     jwt = JWTManager(app)
